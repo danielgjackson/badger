@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
+<link rel="stylesheet" href="style.css">
+<script type="module" src="src/main.js"></script>
+<title>Badge Reader</title>
+</head>
+<body>
+<h1>Badge Reader</h1>
+
+<p>Present a badge with a QR Code to the camera.</p>
+
+<noscript><div class="error">
+    ERROR: Scripting is required, but is not currently enabled.  Please enable it and reload. 
+</div></noscript>
+<div class="error hidden" id="error">
+    ERROR: Unknown error.
+</div>
+
+<div class="inputContainer">
+    <video></video>
+</div>
+
+<div class="outputContainer">
+    <img src="">
+    <meter class="confidence" min="0" max="100" low="33" high="66" optimum="80" value="0">-</meter>
+    <output></output>
+</div>
+
+<!--
+<canvas id="rectangleDebug"></canvas>
+-->
+
+</body>
+</html>

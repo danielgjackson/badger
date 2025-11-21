@@ -1,0 +1,84 @@
+body {
+    font-family: sans-serif;
+}
+
+.error {
+    background-color: #fdd;
+    border: 1px solid #f00;
+    padding: 1em;
+}
+
+.hidden {
+    display: none;
+}
+
+.inputContainer {
+    margin: 1em;
+    box-sizing: content-box;
+    position: relative;
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    border: 1px solid black;
+}
+
+.inputContainer video {
+    box-sizing: content-box;
+    width: 100%;
+    height: auto;
+    display: block;
+    /* outline: 4px dotted red; */
+}
+
+.inputContainer canvas {
+    box-sizing: content-box;
+    max-width: 100%;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* outline: 2px dashed green; */
+}
+
+.outputContainer {
+    position: relative;
+    box-sizing: content-box;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+    margin-top: 1em;
+    border: 1px solid black;
+}
+
+.outputContainer img {
+    max-width: 100%;
+    display: block;
+}
+
+.outputContainer canvas {
+    box-sizing: content-box;
+    max-width: 100%;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* outline: 2px dashed green; */
+}
+
+.outputContainer meter {
+    display: block;
+    width: 80%;
+    margin: 0.5em auto;
+}
+
+.outputContainer output {
+    margin-top: 1em;
+    width: 100%;
+    font-family: monospace;;
+    font-size: x-large;
+    white-space: pre-wrap;
+}
+
+#rectangleDebug {
+    max-width: 100%;
+}
