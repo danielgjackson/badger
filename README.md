@@ -1,5 +1,9 @@
 # Conference Badge Reader
 
+* Code: https://github.com/danielgjackson/badger
+* Demo: https://danielgjackson.github.io/badger
+
+
 ## Overview
 
 * Find QR code and bounding coordinates
