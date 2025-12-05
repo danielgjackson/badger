@@ -1,5 +1,7 @@
 {
     "cSpell.words": [
+        "ARDETECTOR",
+        "artoolkit",
         "bbox",
         "Cañas",
         "CCOMP",
@@ -18,9 +20,11 @@
         "naptha",
         "ocrx",
         "oplus",
+        "patt",
         "RETR",
         "sdim",
         "stackexchange",
+        "submarkers",
         "tessedit",
         "THRESHZERO",
         "undecaf",

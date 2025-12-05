@@ -1,10 +1,20 @@
-# Conference Badge Reader
+# Conference Badge Detector
 
 * Code: https://github.com/danielgjackson/badger
 * Demo: https://danielgjackson.github.io/badger
 
+## Run locally
 
-## Overview
+```bash
+node server.mjs
+```
+
+Visit: [http://localhost:3000](http://localhost:3000).
+
+
+## Purpose
+
+Overview:
 
 * Find QR code and bounding coordinates
 * Extrapolate out to the badge area

@@ -1,3 +1,5 @@
+// Badge Detector
+
 import { lineIntercept } from './utils.js';
 import { BarcodeDetectorPolyfill } from './barcode-detector/barcode-detector.js';
 import { TextDetectorPolyfill } from './text-detector/text-detector.js';
@@ -49,7 +51,7 @@ const defaultOptions = {
 };
 
 
-export class Detector {
+export class Badger {
 
     constructor(options) {
         // defaults

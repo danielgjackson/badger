@@ -1,3 +1,10 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
+<style>
 body {
     font-family: sans-serif;
 }
@@ -82,3 +89,57 @@ body {
 #rectangleDebug {
     max-width: 100%;
 }
+</style>
+<title>AR Toolkit Marker Detector</title>
+</head>
+<body>
+<h1>AR Toolkit Marker Detector</h1>
+
+<p>Present an AR Toolkit marker to the camera.</p>
+
+<noscript><div class="error">
+    ERROR: Scripting is required, but is not currently enabled.  Please enable it and reload. 
+</div></noscript>
+<div class="error hidden" id="error">
+    ERROR: Unknown error.
+</div>
+
+<div class="inputContainer">
+    <video></video>
+</div>
+
+<div class="outputContainer">
+    <output></output>
+</div>
+
+<hr>
+
+</body>
+<script type="module">
+import { ArDetector } from './src/ar-detector/ar-detector.js';
+
+function showError(message) {
+    const errorElement = document.querySelector('#error');
+    errorElement.innerHTML = message;
+    errorElement.classList.remove('hidden');
+}
+
+async function run() {
+    console.log('Creating...');
+    const detector = new ArDetector({});
+
+    console.log('Initializing...');
+    await detector.initialize();
+
+    console.log('Running...');
+    detector.run();
+
+    console.log('...started.');
+    return true;
+}
+
+addEventListener("DOMContentLoaded", async (event) => {
+    run();
+});
+</script>
+</html>
