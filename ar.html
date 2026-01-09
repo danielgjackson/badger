@@ -129,7 +129,47 @@ async function run() {
     const detector = new ArDetector({});
 
     console.log('Initializing...');
-    await detector.initialize();
+    const usePattern = true;
+    const matrixType = '3x3';       // '3x3' (x64) / '4x4_bch_13_9_3' (x512)
+    await detector.initialize(usePattern, matrixType);
+
+    // For debugging, track pattern markers
+    if (usePattern) { await detector.trackMarkerPattern('./depends/artoolkit/data/patt.hiro', 2.0); }
+    if (usePattern) { await detector.trackMarkerPattern('./depends/artoolkit/data/patt.kanji', 2.0); }
+
+    // For now, track specific barcode markers
+    detector.trackMarkerBarcode(39, 2.0);
+
+    // Set up marker callback
+    detector.setMarkerCallback((data, type, id) => {
+        //console.log(JSON.stringify(data));
+
+        // const values = {
+        //     index: data.index,
+        //     type: data.type,                 // -1=?, 1=?  (lost???)
+        //     id: data.marker.id,
+        //     idPatt: data.marker.idPatt,      // -1=not pattern,>=0=pattern id
+        //     idMatrix: data.marker.idMatrix,  // -1=not barcode,>=0=barcode id
+        //     dir: data.marker.dir,
+        //     dirPatt: data.marker.dirPatt,
+        //     cf: data.marker.cf,
+        //     cfPatt: data.marker.cfPatt,
+        //     cfMatrix: data.marker.cfMatrix,
+        //     errorCorrected: data.marker.errorCorrected,
+        // };
+        //console.log(JSON.stringify(values));
+
+        const info = {
+            type: type,                 // -1=?, 1=?  (lost???)
+            pattern: data.marker.idPatt >= 0,
+            id: data.marker.idPatt >= 0 ? data.marker.idPatt : (data.marker.idMatrix >= 0 ? data.marker.idMatrix : data.marker.id),
+        };
+        if (info.type >= 0) {
+            console.log(JSON.stringify(info));
+        } else {
+            console.log('Lost?');
+        }
+    });
 
     console.log('Running...');
     detector.run();

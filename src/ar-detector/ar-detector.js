@@ -152,8 +152,6 @@ export class ArDetector {
             'matrix': artoolkit.AR_MATRIX_CODE_DETECTION,
             'color_and_matrix': artoolkit.AR_TEMPLATE_MATCHING_COLOR_AND_MATRIX,
             'mono_and_matrix': artoolkit.AR_TEMPLATE_MATCHING_MONO_AND_MATRIX,
-            // Original API 'usePattern'
-            true: artoolkit.AR_TEMPLATE_MATCHING_MONO_AND_MATRIX,
         };
         if (usePattern) {
             if (!(usePattern in detectionModes)) {
@@ -203,34 +201,34 @@ export class ArDetector {
         return id;
     }
 
-    /* NOTE: setDetectionMode currently always barcode-only
     // Start tracking pattern marker
-    async trackMarkerPattern(patternUrl, markerSize) {  // '/data/patt.kanji' // 'data/patterns/pattern-kanji.patt'
+    async trackMarkerPattern(rawPatternUrl, markerSize) {  // data/patt.kanji' 'data/patt.hiro'
+        const patternUrl = relativePath(rawPatternUrl);
         // Create an object that tracks the marker transform.
         let trackerObjectMaterial = new THREE.MeshBasicMaterial( {color: 0x8888ff, side: THREE.DoubleSide, transparent: true } );
         trackerObjectMaterial.opacity = 0.7;
-        let trackerObject = new THREE.Mesh( new THREE.PlaneGeometry(markerSize, markerSize), trackerObjectMaterial);
+        let trackerObject = new THREE.Mesh(new THREE.PlaneGeometry(markerSize, markerSize), trackerObjectMaterial);
         trackerObject.matrixAutoUpdate = false;
         trackerObject.position.z = 0;
 
         // Load the pattern marker to use (type = 0)
         return new Promise((resolve, reject) => {
-        this.arController.loadMarker(patternUrl, (markerId) => {
-            let markerRoot = this.arController.createThreeMarker(markerId, markerSize);
-            markerRoot.add(trackerObject);
-            this.arScene.scene.add(markerRoot);
-            // console.log("DEBUG: MARKER-PATTERN #" + markerId);
-            resolve(markerId);
-        }, (err) => {
-            reject(new Error(err));
-        });
+            this.arController.loadMarker(patternUrl, (markerId) => {
+                let markerRoot = this.arController.createThreeMarker(markerId, markerSize);
+                markerRoot.add(trackerObject);
+                this.arScene.scene.add(markerRoot);
+                // console.log("DEBUG: MARKER-PATTERN #" + markerId);
+                resolve(markerId);
+            }, (err) => {
+                reject(new Error(err));
+            });
         });
     }
-    */
     
 
     // Start tracking multi-marker
-    async trackMultiMarker(multiMarkerUrl, region, subMarkerSize) {  // '/data/multi-barcode-8x6-no39.dat'   // 4x3, 8x6  // subMarkerSize=35
+    async trackMultiMarker(rawMultiMarkerUrl, region, subMarkerSize) {  // '/data/multi-barcode-8x6-no39.dat'   // 4x3, 8x6  // subMarkerSize=35
+        const multiMarkerUrl = relativePath(rawMultiMarkerUrl);
         // Load the multi-marker to use.
         return new Promise((resolve, reject) => {
             this.arController.loadMultiMarker(multiMarkerUrl, (marker, markerNum) => {
@@ -281,11 +279,10 @@ export class ArDetector {
     }
 
 
-    async initialize() {
+    async initialize(usePattern = false, matrixType = '3x3') {
         // TODO: Make these options
         const maxARVideoSize = 640;
         const cameraParam = './depends/artoolkit/data/camera_para.dat'; // 'data/camera_para.dat' 'data/camera_para-iPhone 5 rear 640x480 1.0m.dat'
-        const usePattern = false;
 
         console.log("ARDETECTOR Creating getUserMedia scene...");
         await this.createMediaScene(maxARVideoSize, cameraParam);
@@ -294,20 +291,24 @@ export class ArDetector {
         this.createRenderer();  // uses arController
 
         // Set detection mode
-        this.setDetectionMode(usePattern);
+        this.setDetectionMode(usePattern ? 'mono_and_matrix' : 'matrix', matrixType);
+
+        // this.trackMarkerBarcode(39, 2.0);
+        // if (usePattern) { await this.trackMarkerPattern('./depends/artoolkit/data/patt.hiro', 2.0); }
+        // if (usePattern) { await this.trackMarkerPattern('./depends/artoolkit/data/patt.kanji', 2.0); }
 
         // --- callbacks for arController.process(image); ---
         this.arController.addEventListener('getMarker', (ev) => {
             //console.log("MARKER: ", "type", ev.data.type, "id", ev.data.marker.id, "patt=", ev.data.marker.idPatt, "matrix=", ev.data.marker.idMatrix); // ev.data
             if (this.markerCallback) {
-                this.markerCallback(ev.data.type, ev.data.marker.id, ev.data.matrix.slice(0)); // .toArray()
+                this.markerCallback(ev.data, ev.data.type, ev.data.marker.id, ev.data.matrix.slice(0)); // .toArray()
             }
         });
         
         this.arController.addEventListener('getMultiMarker', (ev) => {
             // console.log("MULTI-MARKER #" + ev.data.multiMarkerId + ": ", [].join.call(ev.data.matrix, ', '));
             if (this.multiMarkerCallback) {
-                this.multiMarkerCallback(ev.data.multiMarkerId, ev.data.matrix.slice(0)); // .toArray()
+                this.multiMarkerCallback(ev.data, ev.data.multiMarkerId, ev.data.matrix.slice(0)); // .toArray()
             }
         });
     }
