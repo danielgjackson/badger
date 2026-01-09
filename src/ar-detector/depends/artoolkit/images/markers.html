@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARToolKit Markers</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+        main {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2em;
+            justify-content: center;
+        }
+        figure {
+            margin: 0;
+            text-align: center;
+        }
+        figcaption {
+            margin-top: 0.5em;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+<dialog id="chooseMarkerType" closedby="none">
+    <form>
+        <fieldset>
+            <legend>Marker Type</legend>
+            <label>
+                Marker Type:
+                <select autofocus required>
+                    <option value="" disabled selected>(Select)</option>
+                    <option value="AR_MATRIX_CODE_3x3"            data-count="64"  >3×3/64</option>
+                    <option value="AR_MATRIX_CODE_3x3_PARITY65"   data-count="32"  >3×3/32 (P-65: 1bD/0bC)</option>
+                    <option value="AR_MATRIX_CODE_3x3_HAMMING63"  data-count="8"   >3×3/8 (H-63: 2bD/1bC)</option>
+                    <option value="AR_MATRIX_CODE_4x4"            data-count="8192">4×4/8192</option>
+                    <option value="AR_MATRIX_CODE_4x4_BCH_13_9_3" data-count="512" >4×4/512 (BCH-13/9/3: 2bD/1bC)</option>
+                    <option value="AR_MATRIX_CODE_4x4_BCH_13_5_5" data-count="32"  >4×4/32 (BCH-13/5/5: 4bD/2bC)</option>
+                </select>
+                <button id="selectButton" type="submit" value="default">Select</button>
+            </label>
+        </fieldset>
+    </form>
+</dialog>
+<main></main>
+</body>
+<script>
+const IMAGE_SIZE = 128;
+const dialog = document.querySelector('#chooseMarkerType');
+dialog.querySelector('form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const select = dialog.querySelector('select');
+    const returnValue = {
+        id: select.value,
+        count: select.selectedOptions[0].dataset.count,
+    };
+    dialog.close(JSON.stringify(returnValue));
+    return false;
+});
+dialog.addEventListener('close', (e) => {
+    const markerType = JSON.parse(dialog.returnValue);
+    console.log('markerType=' + JSON.stringify(markerType));
+    //document.title = document.title.split(':')[0] + ': ' + markerType.id;
+    document.title = markerType.id;
+
+    // List images
+    const container = document.querySelector('main');
+    const numDigits = String(markerType.count - 1).length;
+    for (let i = 0; i < markerType.count; i++) {
+        const id = String(i).padStart(numDigits, '0');
+
+        const img = document.createElement('img');
+        const path = `./${markerType.id}/${id}.png`;
+        img.src = path;
+        img.alt = id;
+        img.title = id;
+        img.width = IMAGE_SIZE;
+        img.height = img.width;
+
+        const figure = document.createElement('figure');
+        figure.appendChild(img);
+        const figCaption = document.createElement('figcaption');
+        figCaption.textContent = id;
+        figure.appendChild(figCaption);
+        container.appendChild(figure);
+    }
+});
+chooseMarkerType.showModal();
+</script>
+</html>
