@@ -7,20 +7,25 @@
 // and:  https://github.com/mrdoob/three.js
 //
 
+function relativePath(rawUrl) {
+    // Full URL, relative to this script
+    let relativePath = (new URL(rawUrl, import.meta.url)).toString();
+    // Remove the page URL as a base
+    const base = window.location.toString();
+    if (relativePath.startsWith(base)) {
+        relativePath = relativePath.substring(base.length);
+        if (relativePath.startsWith('/')) {
+            relativePath = relativePath.substring(1);
+        }
+        relativePath = './' + relativePath;
+    }
+    return relativePath;
+}
+
 // Asynchronously load a script
 async function loadScript(rawUrl) {
   return new Promise((resolve, reject) => {
-    // Full URL, relative to this script
-    let scriptFile = (new URL(rawUrl, import.meta.url)).toString();
-    // Remove the page URL as a base
-    const base = window.location.toString();
-    if (scriptFile.startsWith(base)) {
-        scriptFile = scriptFile.substring(base.length);
-        if (scriptFile.startsWith('/')) {
-            scriptFile = scriptFile.substring(1);
-        }
-        scriptFile = './' + scriptFile;
-    }
+    const scriptFile = relativePath(rawUrl);
     console.log("SCRIPT: Load: " + rawUrl + " -> " + scriptFile);
     const script = document.createElement('script');
     script.type = 'text/javascript';
@@ -66,8 +71,8 @@ export class ArDetector {
 
             // Load external scripts
             await loadScript('./depends/three.js/three.min.js');
-            await loadScript('./depends/artoolkit/artoolkit.min.js');
             await loadScript('./depends/artoolkit/artoolkit.api.js');
+            await loadScript('./depends/artoolkit/artoolkit.min.js');
             await loadScript('./depends/artoolkit/artoolkit.three.js');
 
             // Only finished when ARThree is ready
@@ -94,7 +99,9 @@ export class ArDetector {
     }
 
     // Create getUserMedia Three scene
-    async createMediaScene(maxARVideoSize, cameraParam) {
+    async createMediaScene(maxARVideoSize, rawCameraParam) {
+        await ArDetector.startupPromise;
+        const cameraParam = relativePath(rawCameraParam);
         console.log("ARDETECTOR: createMediaScene()");
         return new Promise((resolve, reject) => {
             window.ARController.getUserMediaThreeScene({
@@ -137,13 +144,44 @@ export class ArDetector {
 
 
     // Set detection mode
-    setDetectionMode(usePattern) {
-        // Detection mode
-        let detectionMode = usePattern
-            ? artoolkit.AR_TEMPLATE_MATCHING_MONO_AND_MATRIX // artoolkit.AR_TEMPLATE_MATCHING_MONO
-            : artoolkit.AR_MATRIX_CODE_DETECTION
-        ;
+    setDetectionMode(usePattern, matrix) {
+        let detectionMode = artoolkit.AR_MATRIX_CODE_DETECTION;
+        const detectionModes = {
+            'color': artoolkit.AR_TEMPLATE_MATCHING_COLOR,  // base API's default
+            'mono': artoolkit.AR_TEMPLATE_MATCHING_MONO,
+            'matrix': artoolkit.AR_MATRIX_CODE_DETECTION,
+            'color_and_matrix': artoolkit.AR_TEMPLATE_MATCHING_COLOR_AND_MATRIX,
+            'mono_and_matrix': artoolkit.AR_TEMPLATE_MATCHING_MONO_AND_MATRIX,
+            // Original API 'usePattern'
+            true: artoolkit.AR_TEMPLATE_MATCHING_MONO_AND_MATRIX,
+        };
+        if (usePattern) {
+            if (!(usePattern in detectionModes)) {
+                throw new Error('ARDETECTOR: setDetectionMode: unknown detection mode "' + usePattern + '"');
+            }
+            detectionMode = detectionModes[usePattern];
+        }
         this.arController.setPatternDetectionMode(detectionMode);
+
+        // Matrix code type
+        let matrixCodeType = artoolkit.AR_MATRIX_CODE_3x3;
+        // Marker information: https://github.com/artoolkitx/artoolkitx/wiki/Creating-and-using-square-barcode-markers
+        // Marker generation tool: https://au.gmented.com/app/marker/marker.php
+        const matrixCodeTypes = {
+            '3x3': artoolkit.AR_MATRIX_CODE_3x3,                        //   64 markers, 0-bit error detection, 0-bit error correction
+            '3x3_hamming63': artoolkit.AR_MATRIX_CODE_3x3_HAMMING63,    //    8 markers, 2-bit error detection, 1-bit error correction
+            '3x3_parity65': artoolkit.AR_MATRIX_CODE_3x3_PARITY65,      //   32 markers, 1-bit error detection, 0-bit error correction
+            '4x4': artoolkit.AR_MATRIX_CODE_4x4,                        // 8192 markers, 0-bit error detection, 0-bit error correction
+            '4x4_bch_13_9_3': artoolkit.AR_MATRIX_CODE_4x4_BCH_13_9_3,  //  512 markers, 2-bit error detection, 1-bit error correction
+            '4x4_bch_13_5_5': artoolkit.AR_MATRIX_CODE_4x4_BCH_13_5_5,  //   32 markers, 4-bit error detection, 2-bit error correction
+        }
+        if (matrix) {
+            if (!(matrix in matrixCodeTypes)) {
+                throw new Error('ARDETECTOR: setDetectionMode: unknown matrix code type "' + matrix + '"');
+            }
+            matrixCodeType = matrixCodeTypes[matrix];
+        }
+        this.arController.setMatrixCodeType(matrixCodeType);
     }
     
 
@@ -246,7 +284,7 @@ export class ArDetector {
     async initialize() {
         // TODO: Make these options
         const maxARVideoSize = 640;
-        const cameraParam = '/data/camera_para.dat'; // 'data/camera_para.dat' 'data/camera_para-iPhone 5 rear 640x480 1.0m.dat'
+        const cameraParam = './depends/artoolkit/data/camera_para.dat'; // 'data/camera_para.dat' 'data/camera_para-iPhone 5 rear 640x480 1.0m.dat'
         const usePattern = false;
 
         console.log("ARDETECTOR Creating getUserMedia scene...");
