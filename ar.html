@@ -118,6 +118,9 @@ body {
 <script type="module">
 import { ArDetector } from './src/ar-detector/ar-detector.js';
 
+const MAX_MARKER_ID = 130;
+const MATRIX_TYPE = '4x4_bch_13_9_3'; // '3x3' (x64) / '4x4_bch_13_9_3' (x512)
+
 function showError(message) {
     const errorElement = document.querySelector('#error');
     errorElement.innerHTML = message;
@@ -130,15 +133,14 @@ async function run() {
 
     console.log('Initializing...');
     const usePattern = true;
-    const matrixType = '4x4_bch_13_9_3';       // '3x3' (x64) / '4x4_bch_13_9_3' (x512)
-    await detector.initialize(usePattern, matrixType);
+    await detector.initialize(usePattern, MATRIX_TYPE);
 
     // For debugging, track pattern markers
     if (usePattern) { await detector.trackMarkerPattern('./depends/artoolkit/data/patt.hiro', 2.0); }
     if (usePattern) { await detector.trackMarkerPattern('./depends/artoolkit/data/patt.kanji', 2.0); }
 
     // For now, track specific barcode markers
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < MAX_MARKER_ID; i++) {
         detector.trackMarkerBarcode(i, 2.0);
     }
 
