@@ -130,7 +130,7 @@ async function run() {
 
     console.log('Initializing...');
     const usePattern = true;
-    const matrixType = '3x3';       // '3x3' (x64) / '4x4_bch_13_9_3' (x512)
+    const matrixType = '4x4_bch_13_9_3';       // '3x3' (x64) / '4x4_bch_13_9_3' (x512)
     await detector.initialize(usePattern, matrixType);
 
     // For debugging, track pattern markers
@@ -138,7 +138,9 @@ async function run() {
     if (usePattern) { await detector.trackMarkerPattern('./depends/artoolkit/data/patt.kanji', 2.0); }
 
     // For now, track specific barcode markers
-    detector.trackMarkerBarcode(39, 2.0);
+    for (let i = 0; i < 8; i++) {
+        detector.trackMarkerBarcode(i, 2.0);
+    }
 
     // Set up marker callback
     detector.setMarkerCallback((data, type, id) => {
